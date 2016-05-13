@@ -31,8 +31,8 @@
  *
  */
 
-#ifndef miblink_H
-#define miblink_H
+#ifndef psico_H
+#define psico_H
 
 /** \brief Bare Metal example header file
  **

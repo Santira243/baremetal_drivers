@@ -1,4 +1,4 @@
-/* Copyright 2016, XXXXXXX
+/* Copyright 2016, TECLAS
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -31,9 +31,8 @@
  *
  */
 
-#ifndef miblink_H
-#define miblink_H
-
+#ifndef TECLAS_H
+#define TECLAS_H
 /** \brief Bare Metal example header file
  **
  ** This is a mini example of the CIAA Firmware
@@ -56,7 +55,7 @@
 /*
  * modification history (new versions first)
  * -----------------------------------------------------------
- * yyyymmdd v0.0.1 initials initial version
+ * 20160430 v0.0.1 initials initial version
  */
 
 /*==================[inclusions]=============================================*/
@@ -65,42 +64,31 @@
 /*==================[macros]=================================================*/
 #define lpc4337            1
 #define mk60fx512vlq15     2
+#define PinGroup1          1
+
+#define Puerto0             0
+#define Puerto1             1
+
+#define TEC_1             0
+#define TEC_2             1
+#define TEC_3             2
+#define TEC_4             6
+
+#define pTEC_1             4
+#define pTEC_2             8
+#define pTEC_3             9
+#define pTEC_4             9
+
+#define entrada           0
 
 /*==================[typedef]================================================*/
 
 /*==================[external data declaration]==============================*/
-#if (CPU == mk60fx512vlq15)
-/* Reset_Handler is defined in startup_MK60F15.S_CPP */
-void Reset_Handler( void );
 
-extern uint32_t __StackTop;
-#elif (CPU == lpc4337)
-/** \brief Reset ISR
- **
- ** ResetISR is defined in cr_startup_lpc43xx.c
- **
- ** \remark the definition is in
- **         externals/drivers/cortexM4/lpc43xx/src/cr_startup_lpc43xx.c
- **/
-extern void ResetISR(void);
-
-/** \brief Stack Top address
- **
- ** External declaration for the pointer to the stack top from the Linker Script
- **
- ** \remark only a declaration is needed, there is no definition, the address
- **         is set in the linker script:
- **         externals/base/cortexM4/lpc43xx/linker/ciaa_lpc4337.ld.
- **/
-extern void _vStackTop(void);
+void Init_Teclas(void);
+uint8_t Chequea_T(void);
 
 
-
-void RIT_IRQHandler(void);
-
-
-#else
-#endif
 
 /*==================[external functions declaration]=========================*/
 
@@ -108,5 +96,5 @@ void RIT_IRQHandler(void);
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
-#endif /* #ifndef BAREMETAL_BLINKING_H */
+#endif /* #ifndef MI_NUEVO_PROYECTO_H */
 

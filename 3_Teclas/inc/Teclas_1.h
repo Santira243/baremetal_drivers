@@ -31,8 +31,8 @@
  *
  */
 
-#ifndef miblink_H
-#define miblink_H
+#ifndef Teclas1_H
+#define Teclas1_H
 
 /** \brief Bare Metal example header file
  **

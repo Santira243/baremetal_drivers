@@ -1,4 +1,4 @@
-/* Copyright 2016, XXXXXXX
+/* Copyright 2016, Psicodelia
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -31,20 +31,18 @@
  *
  */
 
-#ifndef miblink_H
-#define miblink_H
-
-/** \brief Bare Metal example header file
+/** \brief Blinking Bare Metal example source file
  **
- ** This is a mini example of the CIAA Firmware
+ ** This is a mini example of the CIAA Firmware.
  **
  **/
 
 /** \addtogroup CIAA_Firmware CIAA Firmware
  ** @{ */
+
 /** \addtogroup Examples CIAA Firmware Examples
  ** @{ */
-/** \addtogroup Baremetal Bare Metal example header file
+/** \addtogroup Baremetal Bare Metal example source file
  ** @{ */
 
 /*
@@ -60,53 +58,103 @@
  */
 
 /*==================[inclusions]=============================================*/
+#include "led.h"       /* <= own header */
 #include "stdint.h"
 
-/*==================[macros]=================================================*/
-#define lpc4337            1
-#define mk60fx512vlq15     2
+/*==================[macros and definitions]=================================*/
+#define DELAY 1000000
+/*==================[internal data declaration]==============================*/
 
-/*==================[typedef]================================================*/
+/*==================[internal functions declaration]=========================*/
 
-/*==================[external data declaration]==============================*/
-#if (CPU == mk60fx512vlq15)
-/* Reset_Handler is defined in startup_MK60F15.S_CPP */
-void Reset_Handler( void );
+/*==================[internal data definition]===============================*/
 
-extern uint32_t __StackTop;
-#elif (CPU == lpc4337)
-/** \brief Reset ISR
- **
- ** ResetISR is defined in cr_startup_lpc43xx.c
- **
- ** \remark the definition is in
- **         externals/drivers/cortexM4/lpc43xx/src/cr_startup_lpc43xx.c
- **/
-extern void ResetISR(void);
+/*==================[external data definition]===============================*/
 
-/** \brief Stack Top address
- **
- ** External declaration for the pointer to the stack top from the Linker Script
- **
- ** \remark only a declaration is needed, there is no definition, the address
- **         is set in the linker script:
- **         externals/base/cortexM4/lpc43xx/linker/ciaa_lpc4337.ld.
- **/
-extern void _vStackTop(void);
+/*==================[internal functions definition]==========================*/
+
+/*==================[external functions definition]==========================*/
+/** \brief Main function
+ *
+ * This is the main entry point of the software.
+ *
+ * \returns 0
+ *
+ * \remarks This function never returns. Return value is only to avoid compiler
+ *          warnings or errors.
+ */
+
+int esperar()
+{
+	uint32_t i;
+	for(i=0;i<DELAY;i++)
+		{
+	  		asm("nop");
+		}
+	return 1;
+}
+void psicosis()
+{
+	char aux;
+
+	aux = 'r';
+	Prender(aux);
+	while(!esperar())
+	{}
+	aux = 'r';
+	Apagar(aux);
+	aux='g';
+ 	Prender(aux);
+	while(!esperar())
+	{}
+ 	aux='g';
+    Apagar(aux);
+ 	aux='a';
+ 	Prender(aux);
+	while(!esperar())
+	{}
+ 	aux='a';
+	Apagar(aux);
+	aux='R';
+	Prender(aux);
+	while(!esperar())
+	{}
+
+ 	aux='R';
+	Apagar(aux);
+	aux='G';
+	Prender(aux);
+	while(!esperar())
+	{}
+
+ 	aux='G';
+	Apagar(aux);
+	aux='B';
+	Prender(aux);
+	while(!esperar())
+	{}
+ 	aux='B';
+	Apagar(aux);
+
+}
+
+int main(void)
+{
+   /* perform the needed initialization here */
+
+	Init_Leds();
+
+    while(1)
+    {
+     psicosis();
+    }
+
+}
 
 
-
-void RIT_IRQHandler(void);
-
-
-#else
-#endif
-
-/*==================[external functions declaration]=========================*/
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
-#endif /* #ifndef BAREMETAL_BLINKING_H */
 

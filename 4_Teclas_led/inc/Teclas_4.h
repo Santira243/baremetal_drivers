@@ -31,8 +31,8 @@
  *
  */
 
-#ifndef miblink_H
-#define miblink_H
+#ifndef Teclas4_H
+#define Teclas4_H
 
 /** \brief Bare Metal example header file
  **
@@ -97,7 +97,7 @@ extern void _vStackTop(void);
 
 
 void RIT_IRQHandler(void);
-
+void Rutina(void);
 
 #else
 #endif
