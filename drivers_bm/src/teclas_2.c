@@ -1,4 +1,4 @@
-/* Copyright 2016, Teclas 6
+/* Copyright 2016, TECLAS
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -31,9 +31,9 @@
  *
  */
 
-/** \brief Blinking Bare Metal example source file
+/** \brief Blinking Bare Metal driver Teclas
  **
- ** This is a mini example of the CIAA Firmware.
+ **
  **
  **/
 
@@ -42,7 +42,7 @@
 
 /** \addtogroup Examples CIAA Firmware Examples
  ** @{ */
-/** \addtogroup Baremetal Bare Metal example source file
+/** \addtogroup Baremetal Bare Metal LED Driver
  ** @{ */
 
 /*
@@ -54,34 +54,52 @@
 /*
  * modification history (new versions first)
  * -----------------------------------------------------------
- * yyyymmdd v0.0.1 initials initial version
+ * 20160430 v0.0.1 initials initial version
  */
 
 /*==================[inclusions]=============================================*/
-#include "led.h"
-#include "teclas_2.h"
-#include "timers.h"
-#include "stdint.h"
+
+#ifndef CPU
+#error CPU shall be defined
+#endif
+#if (lpc4337 == CPU)
 #include "chip.h"
+#elif (mk60fx512vlq15 == CPU)
+#else
+#endif
+#include "teclas_2.h"
+
+uint8_t Init_Teclas(tecla *tecla_aux, uint8_t puert, uint8_t pin_l, uint8_t pin_g, uint8_t pin_n, uint8_t pinf )
+{
+	tecla_aux->puerto = puert;
+	tecla_aux->pin_loc = pin_l;
+	tecla_aux->pin_group = pin_g;
+	tecla_aux->pin_num = pin_n;
+	tecla_aux->func = pinf;
+	Chip_GPIO_Init(LPC_GPIO_PORT);
+	Chip_SCU_PinMux(tecla_aux->pin_group,tecla_aux->pin_num,MD_PUP|MD_EZI|MD_ZI,tecla_aux->func);
+	Chip_GPIO_SetDir(LPC_GPIO_PORT,tecla_aux->puerto,1<<tecla_aux->pin_loc,entrada);
+    return 1;
+}
+
+uint8_t Chequea_T(tecla *tecla_aux){
+
+	uint8_t aux = 0;
+
+	if(!(Chip_GPIO_GetPinState(LPC_GPIO_PORT,tecla_aux->puerto,tecla_aux->pin_loc)))
+	   {
+		aux= 1;
+       }
+
+	return aux;
+}
+
+
+
 
 /*==================[macros and definitions]=================================*/
-#define DELAY 1000000
-#define TEC1             1
-#define TEC2             2
-#define TEC3             3
-#define TIEMPO_T           1
-#define TU           700
 
 /*==================[internal data declaration]==============================*/
-uint8_t auxiliar;
-
-uint8_t estado;
-uint32_t teclas_count[4];
-
-uint32_t etec3_TU;
-
-tecla pulsador[4];
-
 
 /*==================[internal functions declaration]=========================*/
 
@@ -102,89 +120,6 @@ tecla pulsador[4];
  *          warnings or errors.
  */
 
-void TitilarLeds()
-{
-    	if (estado)
-		{
-			Apagar('r');
-			Prender('g');
-			estado=0;
-		}
-		else
-	   	{
-			Prender('r');
-			Apagar('g');
-        	estado=1;
-	   	}
-}
-
-
-void Rutina()
-{
-	uint8_t i;
-	for(i=0; i<4; i++)
-	{
-		if (Chequea_T(&pulsador[i]))
-			{
-			if(!pulsador[i].estado)
-							{
-								pulsador[i].estado = 1;
-								teclas_count[i] = 0;
-							}
-							else
-							{
-								teclas_count[i]++;
-							}
-			}
-
-	  if(( pulsador[i].estado== 1) && (!Chequea_T(&pulsador[i])))
-		{
-			/*
-			Se soltó la tecla i
-			*/
-			TitilarLeds();
-	     	 pulsador[i].estado = 0;
-		}
-
-   }
-    Chip_RIT_ClearInt(LPC_RITIMER);
-
-}
-
-
-int main(void)
-{
-   /* perform the needed initialization here */
-	Init_Leds();
-
-	while (!Init_Teclas(&pulsador[0],0,4,1,0,0));
-	/*
-	    Ejemplo:
-	    En EDU CIA el Pulsador 0, TEC 1 //
-	    Se instanciaría de la siguiente forma:
-	    tecla puls0;
-	    Init_Teclas(&pulsador[0],0,4,1,0,0)
-	    donde:
-	    *puerto = 0; // GPIO port 0 -4
-	    *pin_loc = 4;
-	    *pin_group = 1; // Grupo 1 de pines (P1_0)
-	    *pin_num = 0; //Pin 0
-	    *func = 0; //Func0
-	*/
-
-	while (!Init_Teclas(&pulsador[1],0,8,1,1,0));
-	while (!Init_Teclas(&pulsador[2],0,9,1,2,0));
-	while (!Init_Teclas(&pulsador[3],1,9,1,6,0));
-
-    Init_Timers();
-    Setear_Tiempo(TIEMPO_T);
-
-   while(1)
-   {
-   }
-
-    return 1;
-}
 
 
 
