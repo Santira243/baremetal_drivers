@@ -1,4 +1,4 @@
-/* Copyright 2016, TECLAS
+/* Copyright 2016, XXXXXXX
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -31,8 +31,9 @@
  *
  */
 
-#ifndef TECLAS_2_H
-#define TECLAS_2_H
+#ifndef Sierra_H
+#define Sierra_H_H
+
 /** \brief Bare Metal example header file
  **
  ** This is a mini example of the CIAA Firmware
@@ -55,7 +56,7 @@
 /*
  * modification history (new versions first)
  * -----------------------------------------------------------
- * 20160430 v0.0.1 initials initial version
+ * yyyymmdd v0.0.1 initials initial version
  */
 
 /*==================[inclusions]=============================================*/
@@ -65,36 +66,41 @@
 #define lpc4337            1
 #define mk60fx512vlq15     2
 
-#define entrada           0
-
 /*==================[typedef]================================================*/
 
-typedef struct {
-	uint8_t puerto;
-	uint8_t pin_group;
-	uint8_t pin_num;
-	uint8_t func;
-	uint8_t pin_loc;
-	uint8_t estado;
-	uint8_t cuenta_ms;
-   }tecla;
-
-	/*
-    Ejemplo:
-    En EDU CIA el Pulsador 0, TEC 1 //
-    Se instanciaría de la siguiente forma:
-    tecla puls0;
-    puls0.puerto = 0; // GPIO port 0 -4
-    puls0.pin_loc = 4;
-    puls0.pin_group = 1; // Grupo 1 de pines (P1_0)
-    puls0.pin_num = 0; //Pin 0
-    puls0.func = 0; //Func0
-    */
-
 /*==================[external data declaration]==============================*/
+#if (CPU == mk60fx512vlq15)
+/* Reset_Handler is defined in startup_MK60F15.S_CPP */
+void Reset_Handler( void );
 
-uint8_t Init_Teclas(tecla *tecla_aux, uint8_t puert, uint8_t pin_l, uint8_t pin_g, uint8_t pin_n, uint8_t pinf );
-uint8_t Chequea_T(tecla *tecla_aux);
+extern uint32_t __StackTop;
+#elif (CPU == lpc4337)
+/** \brief Reset ISR
+ **
+ ** ResetISR is defined in cr_startup_lpc43xx.c
+ **
+ ** \remark the definition is in
+ **         externals/drivers/cortexM4/lpc43xx/src/cr_startup_lpc43xx.c
+ **/
+extern void ResetISR(void);
+
+/** \brief Stack Top address
+ **
+ ** External declaration for the pointer to the stack top from the Linker Script
+ **
+ ** \remark only a declaration is needed, there is no definition, the address
+ **         is set in the linker script:
+ **         externals/base/cortexM4/lpc43xx/linker/ciaa_lpc4337.ld.
+ **/
+extern void _vStackTop(void);
+
+
+
+void RIT_IRQHandler(void);
+void Rutina(void);
+
+#else
+#endif
 
 /*==================[external functions declaration]=========================*/
 
@@ -102,5 +108,5 @@ uint8_t Chequea_T(tecla *tecla_aux);
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
-#endif /* #ifndef MI_NUEVO_PROYECTO_H */
+#endif /* #ifndef BAREMETAL_BLINKING_H */
 

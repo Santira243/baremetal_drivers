@@ -1,4 +1,4 @@
-/* Copyright 2016, TECLAS
+/* Copyright 2016, XXXXXXXXX  
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -31,19 +31,18 @@
  *
  */
 
-#ifndef TECLAS_2_H
-#define TECLAS_2_H
-/** \brief Bare Metal example header file
+/** \brief Serial
  **
- ** This is a mini example of the CIAA Firmware
+ **
  **
  **/
 
 /** \addtogroup CIAA_Firmware CIAA Firmware
  ** @{ */
+
 /** \addtogroup Examples CIAA Firmware Examples
  ** @{ */
-/** \addtogroup Baremetal Bare Metal example header file
+/** \addtogroup Serial
  ** @{ */
 
 /*
@@ -55,52 +54,78 @@
 /*
  * modification history (new versions first)
  * -----------------------------------------------------------
- * 20160430 v0.0.1 initials initial version
+ * yyyymmdd v0.0.1 initials initial version
  */
 
 /*==================[inclusions]=============================================*/
-#include "stdint.h"
 
-/*==================[macros]=================================================*/
-#define lpc4337            1
-#define mk60fx512vlq15     2
 
-#define entrada           0
+#ifndef CPU
+#error CPU shall be defined
+#endif
+#if (lpc4337 == CPU)
+#include "chip.h"
+#elif (mk60fx512vlq15 == CPU)
+#else
+#endif
 
-/*==================[typedef]================================================*/
+#include "serial.h"
 
-typedef struct {
-	uint8_t puerto;
-	uint8_t pin_group;
-	uint8_t pin_num;
-	uint8_t func;
-	uint8_t pin_loc;
-	uint8_t estado;
-	uint8_t cuenta_ms;
-   }tecla;
 
-	/*
-    Ejemplo:
-    En EDU CIA el Pulsador 0, TEC 1 //
-    Se instanciaría de la siguiente forma:
-    tecla puls0;
-    puls0.puerto = 0; // GPIO port 0 -4
-    puls0.pin_loc = 4;
-    puls0.pin_group = 1; // Grupo 1 de pines (P1_0)
-    puls0.pin_num = 0; //Pin 0
-    puls0.func = 0; //Func0
-    */
+void Init_Serial(uint8_t serialid, uint32_t baud)
+{
+	if(serialid == UART2)
+	{
+		Chip_SCU_PinMux(UART2_PIN_PKG, UART2_PIN_TXD, MD_PDN, FUNC6);
+		Chip_SCU_PinMux(UART2_PIN_PKG, UART2_PIN_RXD, MD_PLN | MD_EZI | MD_ZI  , FUNC6);
+	    Chip_UART_Init (LPC_USART2);
+	    Chip_UART_SetBaud( LPC_USART2,baud );
+	    Chip_UART_SetupFIFOS(LPC_USART2, UART_FCR_FIFO_EN | UART_FCR_TRG_LEV0);
+	    Chip_UART_TXEnable(LPC_USART2);
 
-/*==================[external data declaration]==============================*/
+	}
+}
 
-uint8_t Init_Teclas(tecla *tecla_aux, uint8_t puert, uint8_t pin_l, uint8_t pin_g, uint8_t pin_n, uint8_t pinf );
-uint8_t Chequea_T(tecla *tecla_aux);
+uint8_t Recibir()
+{
+	return (Chip_UART_ReadByte( LPC_USART2));
+}
 
-/*==================[external functions declaration]=========================*/
+
+uint8_t Enviar(uint8_t dato)
+{
+	Chip_UART_SendByte(LPC_USART2,dato);
+	return 1;
+}
+
+
+
+/*==================[internal data declaration]==============================*/
+
+/*==================[internal functions declaration]=========================*/
+
+/*==================[internal data definition]===============================*/
+
+/*==================[external data definition]===============================*/
+
+/*==================[internal functions definition]==========================*/
+
+/*==================[external functions definition]==========================*/
+/** \brief Main function
+ *
+ * This is the main entry point of the software.
+ *
+ * \returns 0
+ *
+ * \remarks This function never returns. Return value is only to avoid compiler
+ *          warnings or errors.
+ */
+
+
+
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
-#endif /* #ifndef MI_NUEVO_PROYECTO_H */
 

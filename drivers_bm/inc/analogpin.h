@@ -1,4 +1,4 @@
-/* Copyright 2016, TECLAS
+/* Copyright 2016, Haller-Romero Ayala
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -31,8 +31,10 @@
  *
  */
 
-#ifndef TECLAS_2_H
-#define TECLAS_2_H
+#ifndef ANALOGPIN_H
+#define ANALOGPIN_H
+
+
 /** \brief Bare Metal example header file
  **
  ** This is a mini example of the CIAA Firmware
@@ -55,7 +57,7 @@
 /*
  * modification history (new versions first)
  * -----------------------------------------------------------
- * 20160430 v0.0.1 initials initial version
+ * 20160415 v0.0.1 initials initial version
  */
 
 /*==================[inclusions]=============================================*/
@@ -65,38 +67,14 @@
 #define lpc4337            1
 #define mk60fx512vlq15     2
 
-#define entrada           0
-
 /*==================[typedef]================================================*/
 
-typedef struct {
-	uint8_t puerto;
-	uint8_t pin_group;
-	uint8_t pin_num;
-	uint8_t func;
-	uint8_t pin_loc;
-	uint8_t estado;
-	uint8_t cuenta_ms;
-   }tecla;
-
-	/*
-    Ejemplo:
-    En EDU CIA el Pulsador 0, TEC 1 //
-    Se instanciaría de la siguiente forma:
-    tecla puls0;
-    puls0.puerto = 0; // GPIO port 0 -4
-    puls0.pin_loc = 4;
-    puls0.pin_group = 1; // Grupo 1 de pines (P1_0)
-    puls0.pin_num = 0; //Pin 0
-    puls0.func = 0; //Func0
-    */
-
 /*==================[external data declaration]==============================*/
+void Init_DAC(uint8_t pin);
+uint8_t Enviar_DAC(uint32_t aux);
 
-uint8_t Init_Teclas(tecla *tecla_aux, uint8_t puert, uint8_t pin_l, uint8_t pin_g, uint8_t pin_n, uint8_t pinf );
-uint8_t Chequea_T(tecla *tecla_aux);
 
-/*==================[external functions declaration]=========================*/
+/*=[external functions declaration]=========================*/
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */

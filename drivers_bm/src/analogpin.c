@@ -1,4 +1,4 @@
-/* Copyright 2016, TECLAS
+/* Copyright 2016, XXXXXXXXX  
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -31,19 +31,18 @@
  *
  */
 
-#ifndef TECLAS_2_H
-#define TECLAS_2_H
-/** \brief Bare Metal example header file
+/** \brief Blinking Bare Metal driver led
  **
- ** This is a mini example of the CIAA Firmware
+ **
  **
  **/
 
 /** \addtogroup CIAA_Firmware CIAA Firmware
  ** @{ */
+
 /** \addtogroup Examples CIAA Firmware Examples
  ** @{ */
-/** \addtogroup Baremetal Bare Metal example header file
+/** \addtogroup Baremetal Bare Metal LED Driver
  ** @{ */
 
 /*
@@ -55,52 +54,87 @@
 /*
  * modification history (new versions first)
  * -----------------------------------------------------------
- * 20160430 v0.0.1 initials initial version
+ * yyyymmdd v0.0.1 initials initial version
  */
 
 /*==================[inclusions]=============================================*/
-#include "stdint.h"
 
-/*==================[macros]=================================================*/
-#define lpc4337            1
-#define mk60fx512vlq15     2
 
-#define entrada           0
+#ifndef CPU
+#error CPU shall be defined
+#endif
+#if (lpc4337 == CPU)
+#include "chip.h"
+#elif (mk60fx512vlq15 == CPU)
+#else
+#endif
 
-/*==================[typedef]================================================*/
+#include "analogpin.h"
 
-typedef struct {
-	uint8_t puerto;
-	uint8_t pin_group;
-	uint8_t pin_num;
-	uint8_t func;
-	uint8_t pin_loc;
-	uint8_t estado;
-	uint8_t cuenta_ms;
-   }tecla;
 
-	/*
-    Ejemplo:
-    En EDU CIA el Pulsador 0, TEC 1 //
-    Se instanciaría de la siguiente forma:
-    tecla puls0;
-    puls0.puerto = 0; // GPIO port 0 -4
-    puls0.pin_loc = 4;
-    puls0.pin_group = 1; // Grupo 1 de pines (P1_0)
-    puls0.pin_num = 0; //Pin 0
-    puls0.func = 0; //Func0
-    */
+void Init_DAC(uint8_t pin)
+{
+	Chip_SCU_DAC_Analog_Config();
+	Chip_DAC_Init(LPC_DAC);
+    Chip_DAC_SetBias(LPC_DAC, DAC_MAX_UPDATE_RATE_400kHz);
+    Chip_DAC_SetDMATimeOut(LPC_DAC, 0xffff);
+    Chip_DAC_ConfigDAConverterControl(LPC_DAC, DAC_CNT_ENA | DAC_DMA_ENA);
 
-/*==================[external data declaration]==============================*/
+/*
+	if(pin == 6)
+	{
+		Chip_SCU_GPIOIntPinSel(0,0,0);
+	}
+*/
 
-uint8_t Init_Teclas(tecla *tecla_aux, uint8_t puert, uint8_t pin_l, uint8_t pin_g, uint8_t pin_n, uint8_t pinf );
-uint8_t Chequea_T(tecla *tecla_aux);
+}
 
-/*==================[external functions declaration]=========================*/
+uint8_t Enviar_DAC(uint32_t aux)
+{
+    Chip_DAC_UpdateValue(LPC_DAC, aux);
+	return 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*==================[macros and definitions]=================================*/
+
+/*==================[internal data declaration]==============================*/
+
+/*==================[internal functions declaration]=========================*/
+
+/*==================[internal data definition]===============================*/
+
+/*==================[external data definition]===============================*/
+
+/*==================[internal functions definition]==========================*/
+
+/*==================[external functions definition]==========================*/
+/** \brief Main function
+ *
+ * This is the main entry point of the software.
+ *
+ * \returns 0
+ *
+ * \remarks This function never returns. Return value is only to avoid compiler
+ *          warnings or errors.
+ */
+
+
+
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
-#endif /* #ifndef MI_NUEVO_PROYECTO_H */
 
