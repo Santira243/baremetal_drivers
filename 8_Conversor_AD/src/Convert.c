@@ -1,4 +1,4 @@
-/* Copyright 2016, Conversor
+/* Copyright 2016, Teclas 6
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -42,7 +42,7 @@
 
 /** \addtogroup Examples CIAA Firmware Examples
  ** @{ */
-/** \addtogroup BaremetalADConv
+/** \addtogroup Baremetal Serial
  ** @{ */
 
 /*
@@ -60,8 +60,11 @@
 /*==================[inclusions]=============================================*/
 #include "stdint.h"
 #include "led.h"
+#include "adconv.h"
+#include "serial.h"
 #include "teclas_2.h"
 #include "timers.h"
+#include "analogpin.h"
 #include "chip.h"
 
 /*==================[macros and definitions]=================================*/
@@ -117,13 +120,13 @@ void TitilarLeds()
         	estado=1;
 	   	}
 }
-void enviar_hola()
-{
-int i;
-const char hola[] = "HOLA MUNDO";
-for (i=0; i<10 ; i++)
-	while(!Enviar(hola[i]));
-}
+//void enviar_hola()
+//{
+//int i;
+//char hola[] = "HOLA MUNDO";
+//for (i=0; i<10 ; i++)
+//	while(!Enviar(hola[i]));
+//}
 
 
 
@@ -152,30 +155,39 @@ void Rutina()
 //		}
 //	}
 
-	//TitilarLeds();
 
-	 	uint8_t aux;
-	    aux = Recibir();
-	    switch (aux)
-	    {
-	    case 'a':
-				Prender('a');
-				enviar_hola();
-				break;
-	    case 'r':
-	  	    	Prender('r');
-	  	    	enviar_hola();
-	  	    	break;
-	    case 'v':
-	  	    	Prender('g');
-	  	    	enviar_hola();
-	  	    	break;
-	    default:
-	    	Apagar('a');
-	    	Apagar('r');
-	    	Apagar('g');
-	    }
-
+//	 	uint8_t aux;
+//	    aux = Recibir();
+//	    switch (aux)
+//	    {
+//	    case 'a':
+//				Prender('a');
+//				enviar_hola();
+//				break;
+//	    case 'r':
+//	  	    	Prender('r');
+//	  	    	enviar_hola();
+//	  	    	break;
+//	    case 'v':
+//	  	    	Prender('g');
+//	  	    	enviar_hola();
+//	  	    	break;
+//	    default:
+//	    	Apagar('a');
+//	    	Apagar('r');
+//	    	Apagar('g');
+//	    }
+	uint16_t aux;
+	aux = RecibirADC();
+	if(aux > 100)
+		{
+		Prender('g');
+		}
+	else
+	{
+		Prender('r');
+	}
+	Enviar( (uint8_t) aux );
 	Chip_RIT_ClearInt(LPC_RITIMER);
 
 
@@ -186,7 +198,7 @@ int main(void)
    /* perform the needed initialization here */
 	Init_Leds();
 	Init_Serial(U2,B_RATE);
-
+	Init_AD(1,1);
 
 //	while (!Init_Teclas(&pulsador[0],0,4,1,0,0));
 //	while (!Init_Teclas(&pulsador[1],0,8,1,1,0));

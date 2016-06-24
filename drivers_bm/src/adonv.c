@@ -1,4 +1,4 @@
-/* Copyright 2016, Conversor
+/* Copyright 2016, XXXXXXXXX  
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -31,9 +31,9 @@
  *
  */
 
-/** \brief Serial
+/** \brief Adconv
  **
- ** This is a mini example of the CIAA Firmware.
+ **
  **
  **/
 
@@ -42,7 +42,7 @@
 
 /** \addtogroup Examples CIAA Firmware Examples
  ** @{ */
-/** \addtogroup BaremetalADConv
+/** \addtogroup Adconv
  ** @{ */
 
 /*
@@ -58,30 +58,48 @@
  */
 
 /*==================[inclusions]=============================================*/
-#include "stdint.h"
-#include "led.h"
-#include "teclas_2.h"
-#include "timers.h"
-#include "chip.h"
 
-/*==================[macros and definitions]=================================*/
-#define DELAY 1000000
-#define TEC1             1
-#define TEC2             2
-#define TEC3             3
-#define TIEMPO_T           20
-#define TU           700
-#define U2           2
-#define B_RATE          115200
+
+#ifndef CPU
+#error CPU shall be defined
+#endif
+#if (lpc4337 == CPU)
+#include "chip.h"
+#elif (mk60fx512vlq15 == CPU)
+#else
+#endif
+
+#include "adconv.h"
+
+
+
+ADC_CLOCK_SETUP_T  clockset;
+
+void Init_AD(uint8_t adnum, uint8_t CH )
+{
+  if (CH == 1)
+	  {
+		Chip_SCU_ADC_Channel_Config(adnum, ADC_CH1);
+		Chip_ADC_Init(LPC_ADC1, &clockset);
+		Chip_ADC_EnableChannel(LPC_ADC1, ADC_CH1,TRUE);
+		Chip_ADC_SetStartMode(LPC_ADC1, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+      }
+}
+
+uint16_t RecibirADC()
+{
+	uint16_t dato;
+
+	while(!Chip_ADC_ReadStatus(LPC_ADC1, ADC_CH1 , ADC_DR_DONE_STAT));
+	Chip_ADC_ReadValue(LPC_ADC1, ADC_CH1, &dato);
+	return (dato);
+}
+
+
+
 
 
 /*==================[internal data declaration]==============================*/
-uint8_t auxiliar;
-uint8_t estado;
-uint32_t teclas_count[4];
-uint32_t etec3_TU;
-tecla pulsador[4];
-
 
 /*==================[internal functions declaration]=========================*/
 
@@ -102,109 +120,6 @@ tecla pulsador[4];
  *          warnings or errors.
  */
 
-void TitilarLeds()
-{
-    	if (estado)
-		{
-			Apagar('r');
-			Prender('g');
-			estado=0;
-		}
-		else
-	   	{
-			Prender('r');
-			Apagar('g');
-        	estado=1;
-	   	}
-}
-void enviar_hola()
-{
-int i;
-const char hola[] = "HOLA MUNDO";
-for (i=0; i<10 ; i++)
-	while(!Enviar(hola[i]));
-}
-
-
-
-void Rutina()
-{
-	uint8_t i;
-//	for(i=0; i<4; i++)
-//	{
-//		if (Chequea_T(&pulsador[i]))
-//			{
-//			if(!pulsador[i].estado)
-//							{
-//								pulsador[i].estado = 1;
-//								teclas_count[i] = 0;
-//							}
-//							else
-//							{
-//								teclas_count[i]++;
-//							}
-//			}
-//
-//	  if(( pulsador[i].estado== 1) && (!Chequea_T(&pulsador[i])))
-//		{
-//			 TitilarLeds();
-//	     	 pulsador[i].estado = 0;
-//		}
-//	}
-
-	//TitilarLeds();
-
-	 	uint8_t aux;
-	    aux = Recibir();
-	    switch (aux)
-	    {
-	    case 'a':
-				Prender('a');
-				enviar_hola();
-				break;
-	    case 'r':
-	  	    	Prender('r');
-	  	    	enviar_hola();
-	  	    	break;
-	    case 'v':
-	  	    	Prender('g');
-	  	    	enviar_hola();
-	  	    	break;
-	    default:
-	    	Apagar('a');
-	    	Apagar('r');
-	    	Apagar('g');
-	    }
-
-	Chip_RIT_ClearInt(LPC_RITIMER);
-
-
-}
-
-int main(void)
-{
-   /* perform the needed initialization here */
-	Init_Leds();
-	Init_Serial(U2,B_RATE);
-
-
-//	while (!Init_Teclas(&pulsador[0],0,4,1,0,0));
-//	while (!Init_Teclas(&pulsador[1],0,8,1,1,0));
-//	while (!Init_Teclas(&pulsador[2],0,9,1,2,0));
-//	while (!Init_Teclas(&pulsador[3],1,9,1,6,0));
-
-    Init_Timers();
-    Setear_Tiempo(TIEMPO_T);
-
-
-   while(1)
-   {
-
-
-   }
-
-    return 1;
-}
 
 
 
