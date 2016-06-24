@@ -73,24 +73,26 @@
 
 
 
-ADC_CLOCK_SETUP_T  clockset;
+static ADC_CLOCK_SETUP_T  clockset;
 
 void Init_AD(uint8_t adnum, uint8_t CH )
 {
+	clockset.adcRate = 1000;
+	clockset.bitsAccuracy = ADC_10BITS;
+	clockset.burstMode = DISABLE;
   if (CH == 1)
 	  {
-		Chip_SCU_ADC_Channel_Config(adnum, ADC_CH1);
-		Chip_ADC_Init(LPC_ADC1, &clockset);
-		Chip_ADC_EnableChannel(LPC_ADC1, ADC_CH1,TRUE);
-		Chip_ADC_SetStartMode(LPC_ADC1, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+	    Chip_ADC_Init(LPC_ADC1, &clockset);
+	    Chip_SCU_ADC_Channel_Config(adnum, ADC_CH1);
+    	Chip_ADC_EnableChannel(LPC_ADC1, ADC_CH1,ENABLE);
       }
 }
 
 uint16_t RecibirADC()
 {
 	uint16_t dato;
-
-	while(!Chip_ADC_ReadStatus(LPC_ADC1, ADC_CH1 , ADC_DR_DONE_STAT));
+	Chip_ADC_SetStartMode(LPC_ADC1, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+	while(Chip_ADC_ReadStatus(LPC_ADC1, ADC_CH1 , ADC_DR_DONE_STAT) !=SET){};
 	Chip_ADC_ReadValue(LPC_ADC1, ADC_CH1, &dato);
 	return (dato);
 }

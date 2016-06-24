@@ -182,12 +182,14 @@ void Rutina()
 	if(aux > 100)
 		{
 		Prender('g');
+		Apagar('r');
 		}
 	else
 	{
 		Prender('r');
+		Apagar('g');
 	}
-	Enviar( (uint8_t) aux );
+	Enviar( (uint8_t) aux);
 	Chip_RIT_ClearInt(LPC_RITIMER);
 
 
