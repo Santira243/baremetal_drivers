@@ -127,7 +127,7 @@ uint8_t Enviar_num(uint16_t dato1)
     	while(!Enviar('0'));
     }
 
- 	while(!Enviar(31));
+ 	while(!Enviar(PUNTO));
 	return 1;
 }
 

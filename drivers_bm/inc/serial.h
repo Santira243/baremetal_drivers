@@ -71,6 +71,7 @@
 #define UART2_PIN_TXD 1
 #define UART2_PIN_RXD 2
 #define MAX_TAM 4
+#define PUNTO 31
 /*==================[typedef]================================================*/
 
 /*==================[external data declaration]==============================*/
