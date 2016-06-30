@@ -189,7 +189,8 @@ void Rutina()
 		Prender('r');
 		Apagar('g');
 	}
-	Enviar( (uint8_t) aux);
+
+	while(!Enviar_num( aux));
 	Chip_RIT_ClearInt(LPC_RITIMER);
 
 

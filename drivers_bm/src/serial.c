@@ -99,6 +99,37 @@ uint8_t Enviar(uint8_t dato)
 }
 
 
+uint8_t Enviar_num(uint16_t dato1)
+{
+	uint8_t i=0;
+	uint8_t digito=0;
+	uint8_t aux[MAX_TAM];
+    if(dato1>1)
+    {
+		while (dato1 >= 1)
+			    {
+				digito = dato1%10;
+				if (i < MAX_TAM ) {
+					aux[i] = (uint8_t) (digito + 48);
+					dato1 -= digito;
+					dato1 /= 10;
+					i++;
+				}
+	}
+		while (i>0)
+			{
+			Enviar(aux[i-1]);
+			i--;
+		}
+    }
+    else
+    {
+    	while(!Enviar('0'));
+    }
+
+ 	while(!Enviar(31));
+	return 1;
+}
 
 /*==================[internal data declaration]==============================*/
 

@@ -70,14 +70,14 @@
 #define UART2_PIN_PKG 7
 #define UART2_PIN_TXD 1
 #define UART2_PIN_RXD 2
-
+#define MAX_TAM 4
 /*==================[typedef]================================================*/
 
 /*==================[external data declaration]==============================*/
 void Init_Serial(uint8_t serialid, uint32_t baud);
 uint8_t Recibir();
 uint8_t Enviar(uint8_t dato);
-
+uint8_t Enviar_num(uint16_t dato1);
 
 /*=[external functions declaration]=========================*/
 
