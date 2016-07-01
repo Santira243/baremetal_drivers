@@ -272,10 +272,10 @@ int main(void)
 	while (!Init_Teclas(&pulsador[2],0,9,1,2,0));
 	while (!Init_Teclas(&pulsador[3],1,9,1,6,0));
 
-	 /*
-	  * SETEOS
-	  *
-	  */
+	/*
+	* SETEOS
+    *
+	*/
 
     Setear_Tiempo(TIEMPO_T);
     factor = INICIO_FACTOR;
@@ -284,7 +284,10 @@ int main(void)
    while(1)
    {
 
-
+		/*
+		* Aqui no pasa nada
+	    *
+		*/
    }
 
     return 1;
