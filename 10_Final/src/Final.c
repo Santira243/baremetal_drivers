@@ -1,4 +1,4 @@
-/* Copyright 2016, XXXXXXXXX  
+/* Copyright 2016, FINAL
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -31,9 +31,9 @@
  *
  */
 
-/** \brief Adconv
+/** \brief Final
  **
- **
+ ** This is a mini example of the CIAA Firmware.
  **
  **/
 
@@ -42,7 +42,7 @@
 
 /** \addtogroup Examples CIAA Firmware Examples
  ** @{ */
-/** \addtogroup Adconv
+/** \addtogroup Baremetal Serial
  ** @{ */
 
 /*
@@ -58,53 +58,40 @@
  */
 
 /*==================[inclusions]=============================================*/
-
-
-#ifndef CPU
-#error CPU shall be defined
-#endif
-#if (lpc4337 == CPU)
-#include "chip.h"
-#elif (mk60fx512vlq15 == CPU)
-#else
-#endif
-
+#include "stdint.h"
+#include "led.h"
 #include "adconv.h"
+#include "serial.h"
+#include "teclas_2.h"
+#include "timers.h"
+#include "analogpin.h"
+#include "chip.h"
 
-
-
-static ADC_CLOCK_SETUP_T  clockset;
-
-void Init_AD(uint8_t adnum, uint8_t CH )
-{
-	clockset.adcRate = 1000;
-	//clockset.adcRate = 10;
-
-	clockset.bitsAccuracy = ADC_10BITS;
-	clockset.burstMode = DISABLE;
-  if (CH == 1)
-	  {
-	    Chip_ADC_Init(LPC_ADC1, &clockset);
-	    Chip_SCU_ADC_Channel_Config(adnum, ADC_CH1);
-    	Chip_ADC_EnableChannel(LPC_ADC1, ADC_CH1,ENABLE);
-      }
-}
-
-uint16_t RecibirADC()
-{
-	uint16_t dato;
-	Chip_ADC_SetStartMode(LPC_ADC1, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
-	while(Chip_ADC_ReadStatus(LPC_ADC1, ADC_CH1 , ADC_DR_DONE_STAT) !=SET){};
-	Chip_ADC_ReadValue(LPC_ADC1, ADC_CH1, &dato);
-	return (dato);
-}
-
-
-
+/*==================[macros and definitions]=================================*/
+#define DELAY 1000000
+#define TEC1             0
+#define TEC2             1
+#define TEC3             2
+#define TEC4             3
+#define INICIO_FACTOR    127
+#define TIEMPO_T           10
+#define TU           700
+#define U2           2
+#define B_RATE          115200
+#define DELTA        5
 
 
 /*==================[internal data declaration]==============================*/
-
+uint8_t auxiliar;
+uint8_t estado;
+uint32_t teclas_count[4];
+uint32_t etec3_TU;
+tecla pulsador[4];
+uint8_t estado_led;
+uint8_t factor;
+uint8_t DAC_EST;
+uint8_t SERIAL;
+uint8_t  valor_dac;
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
@@ -124,6 +111,130 @@ uint16_t RecibirADC()
  *          warnings or errors.
  */
 
+
+
+void Cambiar_estado_led()
+{
+	if(estado_led==TRUE)
+	{
+		Prender('r');
+	    estado_led= FALSE;
+	}
+	else
+	{
+		Apagar('r');
+		estado_led= TRUE;
+	}
+}
+
+void Rutina()
+{
+	uint8_t i;
+	for(i=0; i<4; i++)
+	{
+		if (Chequea_T(&pulsador[i]))
+			{
+			if(!pulsador[i].estado)
+							{
+								pulsador[i].estado = 1;
+								teclas_count[i] = 0;
+							}
+							else
+							{
+								teclas_count[i]++;
+							}
+			}
+
+	  if(( pulsador[i].estado== 1) && (!Chequea_T(&pulsador[i])))
+		{
+		  switch(i)
+		  			{
+		       case TEC1:
+		    	   DAC_EST = 1;
+		    	   factor += DELTA;
+		    	   break;
+
+		       case TEC2:
+		    	   DAC_EST = 1;
+		    	   factor -= DELTA;
+		    	   break;
+
+		       case TEC3:
+		    	   DAC_EST = 0;
+		    	   break;
+
+		       case TEC4:
+
+		    	   break;
+
+
+		       	 	}
+
+	     	 pulsador[i].estado = 0;
+		}
+	}
+
+	uint8_t auxserie;
+	uint16_t aux;
+	uint32_t aux2;
+	aux = RecibirADC();
+	if(aux > 1)
+		{
+	     Cambiar_estado_led();
+		}
+
+	aux2 = (uint32_t) (aux*(10*factor/INICIO_FACTOR)/10);
+
+	if(aux2>1023)
+			{
+				valor_dac = 1023;
+			}
+		else
+			{
+			valor_dac = (uint16_t) aux2;
+			}
+
+	while(!Enviar_DAC(valor_dac));
+
+    auxserie = (uint8_t) aux;
+	while(!Enviar_num( auxserie));
+	Chip_RIT_ClearInt(LPC_RITIMER);
+
+}
+
+int main(void)
+{
+   /*
+    * Inicializaciones
+    *
+    */
+	Init_Leds();
+	Init_Serial(U2,B_RATE);
+	Init_AD(1,1);
+	Init_DAC(0);
+	Init_Timers();
+
+	while (!Init_Teclas(&pulsador[0],0,4,1,0,0));
+    while (!Init_Teclas(&pulsador[1],0,8,1,1,0));
+	while (!Init_Teclas(&pulsador[2],0,9,1,2,0));
+	while (!Init_Teclas(&pulsador[3],1,9,1,6,0));
+
+	 /*
+	  * SETEOS
+	  *
+	  */
+
+    Setear_Tiempo(TIEMPO_T);
+    factor = INICIO_FACTOR;
+
+   while(1)
+   {
+
+
+   }
+
+    return 1;
+}
 
 
 
