@@ -31,9 +31,12 @@
  *
  */
 
-/** \brief Final
+/** \
+ *  Final
  **
- ** This is a mini example of the CIAA Firmware.
+ **  Diseñe e implemente un Firmware sobre la EDU-CIAA que permita adquirir una señal analógica de excursión
+ **  entre 0 y 3.3V, a una frecuencia de muestreo de 10 Hz. La señal deberá reproducirse por el conversor
+ **  D-A..
  **
  **/
 
@@ -46,7 +49,7 @@
  ** @{ */
 
 /*
- * Initials     Name
+ * Initials     SRA
  * ---------------------------
  *
  */
@@ -79,7 +82,10 @@
 #define U2           2
 #define B_RATE          115200
 #define DELTA        5
-
+#define ONE        1
+#define ZERO       0
+#define CantTECLAS 4
+#define MAXVAL 1023
 
 /*==================[internal data declaration]==============================*/
 uint8_t auxiliar;
@@ -96,33 +102,105 @@ const char aumento[] = "Aumento ";
 const char disminuyo[] = "Disminuyo ";
 const char ganancia[] = "la Ganancia";
 
-/*==================[internal functions declaration]=========================*/
 
-/*==================[internal data definition]===============================*/
+/*==================[Interrupt Function]===============================*/
+void Rutina()
+{
+	uint8_t i;
+	for(i=ZERO; i<CantTECLAS; i++)
+	{
+		if (Chequea_T(&pulsador[i]))
+			{
+			if(!pulsador[i].estado)
+				{
+				pulsador[i].estado = ONE;
+				teclas_count[i] = ZERO;
+				}
+			else
+				{
+				teclas_count[i]++;
+				}
+			}
 
-/*==================[external data definition]===============================*/
+	  if(( pulsador[i].estado== 1) && (!Chequea_T(&pulsador[i])))
+		{
+		  switch(i)
+		  	{
+		       case TEC1:
+		    	   DAC_EST = ONE;
+		    	   factor += DELTA;
+		    	   enviar_sube();
+		    	   break;
+
+		       case TEC2:
+		    	   DAC_EST = ONE;
+		    	   factor -= DELTA;
+		    	   enviar_baja();
+		    	   break;
+
+		       case TEC3:
+		    	   DAC_EST = ZERO;
+		    	   enviar_mute();
+		    	   break;
+
+		       case TEC4:
+		    	   SERIAL = ONE;
+		    	   break;
+		    	}
+	     	 pulsador[i].estado = ZERO;
+		}
+	}
+
+	uint16_t aux;
+	uint32_t aux2;
+    uint8_t fac;
+
+	if(DAC_EST)
+		{
+		aux = RecibirADC();
+		}
+	else
+		{
+		aux= ZERO;
+		}
+
+	if(aux > ZERO)
+		{
+	     Cambiar_estado_led();
+		}
+
+	/*====Multiplicar por factor y evitar desborde superior===*/
+	fac = (10*factor/INICIO_FACTOR);
+	aux2 =  (aux*fac)/10;
+
+	if(aux2>MAXVAL)
+		{
+		aux2 = MAXVAL;
+		}
+
+
+	/*====ENVIAR VALOR AL DAC===*/
+	while(!Enviar_DAC(aux2));
+
+	/*====ENVIAR VALOR AL PUERTO SERIE===*/
+	if(SERIAL)
+    	{
+    	while(!Enviar_num( aux));
+    	}
+
+	/*====Limpiar la interrupción===*/
+	Chip_RIT_ClearInt(LPC_RITIMER);
+}
 
 /*==================[internal functions definition]==========================*/
-
-/*==================[external functions definition]==========================*/
-/** \brief Main function
- *
- * This is the main entry point of the software.
- *
- * \returns 0
- *
- * \remarks This function never returns. Return value is only to avoid compiler
- *          warnings or errors.
- */
-
 void enviar_sube()
 {
 int i;
-for (i=0; i<strlen(aumento); i++)
+for (i=ZERO; i<strlen(aumento); i++)
 	{
 	while(!Enviar(aumento[i]));
 	}
-for (i=0; i<strlen(ganancia); i++)
+for (i=ZERO; i<strlen(ganancia); i++)
 	{
 	while(!Enviar(ganancia[i]));
 	}
@@ -131,11 +209,11 @@ for (i=0; i<strlen(ganancia); i++)
 void enviar_baja()
 {
 int i;
-for (i=0; i<strlen(disminuyo) ; i++)
+for (i=ZERO; i<strlen(disminuyo) ; i++)
 	{
 	while(!Enviar(disminuyo[i]));
 	}
-for (i=0; i<strlen(ganancia); i++)
+for (i=ZERO; i<strlen(ganancia); i++)
 	{
 	while(!Enviar(ganancia[i]));
 	}
@@ -166,92 +244,16 @@ void Cambiar_estado_led()
 	}
 }
 
-void Rutina()
-{
-	uint8_t i;
-	for(i=0; i<4; i++)
-	{
-		if (Chequea_T(&pulsador[i]))
-			{
-			if(!pulsador[i].estado)
-							{
-								pulsador[i].estado = 1;
-								teclas_count[i] = 0;
-							}
-							else
-							{
-								teclas_count[i]++;
-							}
-			}
-
-	  if(( pulsador[i].estado== 1) && (!Chequea_T(&pulsador[i])))
-		{
-		  switch(i)
-		  			{
-		       case TEC1:
-		    	   DAC_EST = 1;
-		    	   factor += DELTA;
-		    	   enviar_sube();
-		    	   break;
-
-		       case TEC2:
-		    	   DAC_EST = 1;
-		    	   factor -= DELTA;
-		    	   enviar_baja();
-		    	   break;
-
-		       case TEC3:
-		    	   DAC_EST = 0;
-		    	   enviar_mute();
-		    	   break;
-
-		       case TEC4:
-		    	   SERIAL = 1;
-		    	   break;
-
-
-		       	 	}
-
-	     	 pulsador[i].estado = 0;
-		}
-	}
-
-
-	uint16_t aux;
-	uint32_t aux2;
-    uint8_t fac;
-	if(DAC_EST)
-		{
-		aux = RecibirADC();
-		}
-	else
-		{
-		aux= 0;
-		}
-
-	if(aux > 0)
-		{
-	     Cambiar_estado_led();
-		}
-
-	fac = (10*factor/INICIO_FACTOR);
-	aux2 =  (aux*fac)/10;
-
-	if(aux2>1023)
-			{
-		aux2 = 1023;
-			}
-
-
-	while(!Enviar_DAC(aux2));
-
-	if(SERIAL)
-    {
-    	while(!Enviar_num( aux));
-    }
-	Chip_RIT_ClearInt(LPC_RITIMER);
-
-}
+/*==================[external functions definition]==========================*/
+/** \brief Main function
+ *
+ * This is the main entry point of the software.
+ *
+ * \returns 0
+ *
+ * \remarks This function never returns. Return value is only to avoid compiler
+ *          warnings or errors.
+ */
 
 int main(void)
 {
@@ -262,7 +264,7 @@ int main(void)
 	Init_Leds();
 	Init_Serial(U2,B_RATE);
 	Init_AD(1,1);
-	Init_DAC(0);
+	Init_DAC(ZERO);
 	Init_Timers();
 
 	while (!Init_Teclas(&pulsador[0],0,4,1,0,0));
@@ -277,7 +279,7 @@ int main(void)
 
     Setear_Tiempo(TIEMPO_T);
     factor = INICIO_FACTOR;
-    DAC_EST = 1;
+    DAC_EST = ONE;
 
    while(1)
    {
