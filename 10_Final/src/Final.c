@@ -92,6 +92,10 @@ uint8_t factor;
 uint8_t DAC_EST;
 uint8_t SERIAL;
 uint8_t  valor_dac;
+const char aumento[] = "Aumento ";
+const char disminuyo[] = "Disminuyo ";
+const char ganancia[] = "la Ganancia";
+
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
@@ -111,6 +115,41 @@ uint8_t  valor_dac;
  *          warnings or errors.
  */
 
+void enviar_sube()
+{
+int i;
+for (i=0; i<strlen(aumento); i++)
+	{
+	while(!Enviar(aumento[i]));
+	}
+for (i=0; i<strlen(ganancia); i++)
+	{
+	while(!Enviar(ganancia[i]));
+	}
+}
+
+void enviar_baja()
+{
+int i;
+for (i=0; i<strlen(disminuyo) ; i++)
+	{
+	while(!Enviar(disminuyo[i]));
+	}
+for (i=0; i<strlen(ganancia); i++)
+	{
+	while(!Enviar(ganancia[i]));
+	}
+}
+
+void enviar_mute()
+{
+int i;
+const char mudo[] = "MUTE";
+for (i=0; i<strlen(mudo) ; i++)
+	{
+	while(!Enviar(mudo[i]));
+	}
+}
 
 
 void Cambiar_estado_led()
@@ -152,19 +191,22 @@ void Rutina()
 		       case TEC1:
 		    	   DAC_EST = 1;
 		    	   factor += DELTA;
+		    	   enviar_sube();
 		    	   break;
 
 		       case TEC2:
 		    	   DAC_EST = 1;
 		    	   factor -= DELTA;
+		    	   enviar_baja();
 		    	   break;
 
 		       case TEC3:
 		    	   DAC_EST = 0;
+		    	   enviar_mute();
 		    	   break;
 
 		       case TEC4:
-
+		    	   SERIAL = 1;
 		    	   break;
 
 
@@ -174,18 +216,25 @@ void Rutina()
 		}
 	}
 
-	uint8_t auxserie;
+
 	uint16_t aux;
 	uint32_t aux2;
+    uint8_t fac;
+	if(DAC_EST)
+		{
+		aux = RecibirADC();
+		}
+	else
+		{
+		aux= 0;
+		}
 
-	aux = RecibirADC();
-
-	if(aux > 1)
+	if(aux > 0)
 		{
 	     Cambiar_estado_led();
 		}
-
-	aux2 = (uint16_t) (aux*(10*factor/INICIO_FACTOR)/10);
+	fac = (10*factor/INICIO_FACTOR);
+	aux2 = (uint16_t) (aux*fac)/10;
 
 	if(aux2>1023)
 			{
@@ -193,11 +242,15 @@ void Rutina()
 			}
 	else
 			{
-			valor_dac = (uint16_t) aux2;
+			valor_dac =  aux2;
 			}
 
 	while(!Enviar_DAC(valor_dac));
-    while(!Enviar_num( aux));
+
+	if(SERIAL)
+    {
+    	while(!Enviar_num( aux));
+    }
 	Chip_RIT_ClearInt(LPC_RITIMER);
 
 }
@@ -226,6 +279,7 @@ int main(void)
 
     Setear_Tiempo(TIEMPO_T);
     factor = INICIO_FACTOR;
+    DAC_EST = 1;
 
    while(1)
    {
