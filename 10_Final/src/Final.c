@@ -74,7 +74,7 @@
 #define TEC3             2
 #define TEC4             3
 #define INICIO_FACTOR    127
-#define TIEMPO_T           10
+#define TIEMPO_T           100
 #define TU           700
 #define U2           2
 #define B_RATE          115200
@@ -177,27 +177,27 @@ void Rutina()
 	uint8_t auxserie;
 	uint16_t aux;
 	uint32_t aux2;
+
 	aux = RecibirADC();
+
 	if(aux > 1)
 		{
 	     Cambiar_estado_led();
 		}
 
-	aux2 = (uint32_t) (aux*(10*factor/INICIO_FACTOR)/10);
+	aux2 = (uint16_t) (aux*(10*factor/INICIO_FACTOR)/10);
 
 	if(aux2>1023)
 			{
-				valor_dac = 1023;
+	    	valor_dac = 1023;
 			}
-		else
+	else
 			{
 			valor_dac = (uint16_t) aux2;
 			}
 
 	while(!Enviar_DAC(valor_dac));
-
-    auxserie = (uint8_t) aux;
-	while(!Enviar_num( auxserie));
+    while(!Enviar_num( aux));
 	Chip_RIT_ClearInt(LPC_RITIMER);
 
 }
