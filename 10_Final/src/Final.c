@@ -91,7 +91,7 @@ uint8_t estado_led;
 uint8_t factor;
 uint8_t DAC_EST;
 uint8_t SERIAL;
-uint8_t  valor_dac;
+
 const char aumento[] = "Aumento ";
 const char disminuyo[] = "Disminuyo ";
 const char ganancia[] = "la Ganancia";
@@ -233,19 +233,17 @@ void Rutina()
 		{
 	     Cambiar_estado_led();
 		}
+
 	fac = (10*factor/INICIO_FACTOR);
-	aux2 = (uint16_t) (aux*fac)/10;
+	aux2 =  (aux*fac)/10;
 
 	if(aux2>1023)
 			{
-	    	valor_dac = 1023;
-			}
-	else
-			{
-			valor_dac =  aux2;
+		aux2 = 1023;
 			}
 
-	while(!Enviar_DAC(valor_dac));
+
+	while(!Enviar_DAC(aux2));
 
 	if(SERIAL)
     {
